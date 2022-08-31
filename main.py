@@ -3,6 +3,7 @@ from flask import Flask, render_template, url_for, copy_current_request_context
 from random import random
 from time import sleep
 from threading import Thread, Event
+from PyPyfiles.config import Config
 app = Flask(__name__)
 
 
@@ -26,23 +27,12 @@ def randomNumberGenerator():
         socketio.emit('newnumber', {'number': number}, namespace='/test')
         socketio.sleep(1)
 
-posts = [{
-'author': 'EVtoHome',
-'date_posted': '09/19',
-'title' : 'test',
-'content' : 'Battery voltage at Station 1:'
-
-},{
-'author': 'EVtoGrid',
-'date_posted': '09/20',
-'title' : 'Test',
-'content' : 'This is a test'
-}]
-
 
 @app.route("/")
 def home():
-    #trying = Post().getinfo(posts)
+    Post = Config()
+
+    posts = Post.setup()
     return render_template('home.html', posts= posts)
 
 @socketio.on('connect', namespace='/test')
@@ -55,7 +45,7 @@ def test_connect():
     if not thread.is_alive():
         print("Starting Thread")
         thread = socketio.start_background_task(randomNumberGenerator)
-
+       
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     print('Client disconnected')
